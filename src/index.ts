@@ -12,15 +12,15 @@ interface Balances {
 }
 
 interface User {
-    id: String;
+    id: string;
     name: string;
     balances: Balances;
     }
 
 interface Order {
-    id: String;
-    amount: string;
-    userId: number;
+    id: string;
+    price: string;
+    userId: string;
     quantity: number;
     stock: string;
     time: Date;
@@ -34,17 +34,16 @@ const offer: Order[] = []
 
 const initializeStockBalances = (): { [key: string]: number } => {
     const stockBalances: { [key: string]: number } = {};
-    stock.forEach((stockName) => {
-        stockBalances[stockName] = 0;
+    stock.forEach((stock) => {
+        stockBalances[stock] = 0;
     });
     return stockBalances;
 };
 
 
 // fixes needed prices and userid balance
-
 const users: User[] = [
-
+    
     {
         id: "1",
         name: "John Doe",
@@ -80,9 +79,10 @@ const updateBalances = (userId: string, stock: string, quantity: number): void =
 // Body should contain info about the order including name of stock, quantity, price, and user id
 app.post("/order", (req, res) => {
     // Need to add cookies/jwt and all that jazz
-    const { side, id, price, userId, quantity, stock } = req.body;
+    const { side, id, price, userId, quantity } = req.body;
+    const { stock } = req.body;
 
-    const remainingQty = fillOrder(side, stock, quantity, price, userId);
+    const remainingQty = fillOrder( stock, quantity, price, userId, new Date());
 
     if (remainingQty === 0) {
         res.json({filledQuantity: quantity})
@@ -91,19 +91,21 @@ app.post("/order", (req, res) => {
     if(side == "bid"){
         bids.push({
             id,
-            price: number,
+            price,
             userId,
-            quantity:remainingQty,
-            stock
+            quantity: remainingQty,
+            stock,
+            time: new Date(),
         });
         bids.sort((a, b) => a.price < b.price ? -1 : a.price > b.price ? 1 : 0);
     }   else {
             offer.push({
                 id,
-                price: number,
+                price,
                 userId,
                 quantity:remainingQty,
-                stock
+                stock,
+                time: new Date(),
             });
             offer.sort((a, b) => a.price < b.price ? 1 : a.price > b.price ? -1 : 0);
         }
