@@ -43,7 +43,7 @@ const initializeStockBalances = (): { [key: string]: number } => {
 
 // fixes needed prices and userid balance
 const users: User[] = [
-    
+
     {
         id: "1",
         name: "John Doe",
@@ -115,8 +115,39 @@ app.post("/order", (req, res) => {
     });
 })
 
-app.get("/orderbook", (req, res) => {
-    //Need to implement this :p
+app.get("/orderbook", (req: any, res: any) => {
+    // Represents a depth dict with price as key and  and the values associated with those keys
+    // are dictionaries containing the order type and quantity information.
+    const depth: {
+        [price : string]: {
+            type: "bid" | "offer",
+            quantity: number,
+    }
+} = {};
+
+for(let i = 0; i < bids.length; i++){
+    if(!depth[bids[i].price]){
+        depth[bids[i].price] = {
+            type: "bid",
+            quantity: bids[i].quantity,
+        };
+    }else {
+        depth[bids[i].price].quantity += bids[i].quantity;
+    }
+}
+for (let i = 0; i < offer.length; i++) {
+    if (!depth[offer[i].price]) {
+      depth[offer[i].price] = {
+        type: "offer",
+        quantity: offer[i].quantity,
+      };
+    } else {
+      depth[offer[i].price].quantity += offer[i].quantity;
+    }
+  }
+
+  res.json({ depth });
+  
 })
 
 function fillOrder(stock: string, quantity: number, price: number, userId: number, time: Date){
